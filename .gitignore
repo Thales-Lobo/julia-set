@@ -1,0 +1,11 @@
+# Ignore all files inside the “images” and “build” folders
+sequential/images/*
+sequential/build/*
+parallel/images/*
+parallel/build/*
+
+# Allow folders to be sent empty
+!sequential/images/.gitkeep
+!sequential/build/.gitkeep
+!parallel/images/.gitkeep
+!parallel/build/.gitkeep
