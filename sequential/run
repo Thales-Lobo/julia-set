@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Check if argument n is provided
+if [ -z "$1" ]; then
+    echo "Usage: ./run.sh <n>"
+    exit 1
+fi
+
+# Check if make was successful
+if [ $? -eq 0 ]; then
+    echo "Build successful. Running the program..."
+    # Run the program with the provided argument n
+    ./build/julia $1
+else
+    echo "Build failed. Please check the errors."
+    exit 1
+fi
