@@ -6,6 +6,7 @@
         "compute_julia_pixel.h": "c",
         "write_bmp_header.h": "c",
         "save_image_to_bmp.h": "c",
-        "write_partial_bmp.h": "c"
+        "write_partial_bmp.h": "c",
+        "stdlib.h": "c"
     }
 }

@@ -5,8 +5,10 @@
 #include "../include/compute_julia_pixel.h"
 #include "../include/write_bmp_header.h"
 #include "../include/write_partial_bmp.h"
+#include "../include/append_to_csv.h"
 
 #define OUTPUT_IMAGE_PATH "images/julia_mpi.bmp"
+#define REPORT_PATH "report/parallel_execution_report.csv"
 
 int main(int argc, char *argv[]) {
     int rank, size, n;
@@ -18,7 +20,6 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    // Medir tempo de setup (argumentos e inicializações)
     setup_start_time = MPI_Wtime();
     if (argc != 2) {
         if (rank == 0) fprintf(stderr, "Usage: %s <n>\n", argv[0]);
@@ -37,11 +38,9 @@ int main(int argc, char *argv[]) {
     int rows_per_process = height / size;
     int remaining_rows = height % size;
 
-    // Determinar o intervalo de linhas de cada processo
     int start_row = rank * rows_per_process + (rank < remaining_rows ? rank : remaining_rows);
     int local_rows = rows_per_process + (rank < remaining_rows ? 1 : 0);
 
-    // Alocar espaço para os pixels locais
     unsigned char *pixels = (unsigned char *)malloc(3 * width * local_rows * sizeof(unsigned char));
     if (!pixels) {
         fprintf(stderr, "[Process %d] Memory allocation failed.\n", rank);
@@ -50,7 +49,6 @@ int main(int argc, char *argv[]) {
     }
     setup_end_time = MPI_Wtime();
 
-    // Computar os pixels
     double compute_start_time = MPI_Wtime();
     for (int y = 0; y < local_rows; y++) {
         for (int x = 0; x < width; x++) {
@@ -64,7 +62,6 @@ int main(int argc, char *argv[]) {
     }
     double compute_end_time = MPI_Wtime();
 
-    // Processo 0 cria o arquivo e escreve o cabeçalho
     double header_write_time = 0;
     if (rank == 0) {
         double header_write_start_time = MPI_Wtime();
@@ -83,7 +80,6 @@ int main(int argc, char *argv[]) {
         header_write_time = header_write_end_time - header_write_start_time;
     }
 
-    // Sincronização explícita para escrita no arquivo
     double barrier_start_time = MPI_Wtime();
     MPI_Barrier(MPI_COMM_WORLD);
     barrier_time += MPI_Wtime() - barrier_start_time;
@@ -92,7 +88,6 @@ int main(int argc, char *argv[]) {
         MPI_Recv(NULL, 0, MPI_BYTE, rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 
-    // Escrita das linhas no arquivo
     double file_write_start_time = MPI_Wtime();
     FILE *file = fopen(OUTPUT_IMAGE_PATH, "r+b");
     if (!file) {
@@ -107,11 +102,9 @@ int main(int argc, char *argv[]) {
         MPI_Send(NULL, 0, MPI_BYTE, rank + 1, 0, MPI_COMM_WORLD);
     }
 
-    // Medir tempo de finalização
     finalize_time = MPI_Wtime();
     double total_end_time = finalize_time;
 
-    // Exibir relatório
     double total_execution_time = total_end_time - total_start_time;
     double file_write_time = file_write_end_time - file_write_start_time;
 
@@ -121,7 +114,18 @@ int main(int argc, char *argv[]) {
     printf("  Header Writing: %.3f seconds\n", header_write_time);
     printf("  File Writing: %.3f seconds\n", file_write_time);
     printf("  Barrier Synchronization: %.3f seconds\n", barrier_time);
-    printf("  Total Execution: %.3f seconds\n", total_execution_time);
+    printf("  Total Execution %d: %.3f seconds\n", rank, total_execution_time);
+
+    double max_execution_time;
+    MPI_Reduce(&total_execution_time, &max_execution_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+
+
+    if (rank == 0) {
+        printf("\n=== Final Report ===\n");
+        printf("System Total Execution Time: %.3f seconds\n", max_execution_time);
+
+        append_to_csv(REPORT_PATH, size, n, max_execution_time);
+    }
 
     free(pixels);
     MPI_Finalize();

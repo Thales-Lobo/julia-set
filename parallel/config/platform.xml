@@ -71,7 +71,7 @@
   <host id="host-61.hawaii.edu" speed="199.4Gf"/>
   <host id="host-62.hawaii.edu" speed="199.3Gf"/>
   <host id="host-63.hawaii.edu" speed="199.3Gf"/>
-  <link id="link" latency="10us" bandwidth="100Gbps"/>
+  <link id="link" latency="10us" bandwidth="200Gbps"/>
   <route src="host-0.hawaii.edu" dst="host-1.hawaii.edu">
 	<link_ctn id="link"/>
   </route>

@@ -21,7 +21,8 @@ SRCS = $(SRC_DIR)/sequential_julia.c \
        $(SRC_DIR)/compute_julia_pixel.c \
        $(SRC_DIR)/write_bmp_header.c \
 	   $(SRC_DIR)/save_image_to_bmp.c \
-       $(UTILS_DIR)/display_progress.c
+       $(UTILS_DIR)/display_progress.c \
+	   $(UTILS_DIR)/append_to_csv.c
 
 # Object files
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(filter-out $(UTILS_DIR)/%.c, $(SRCS))) \
