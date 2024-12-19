@@ -1,0 +1,19 @@
+#!/bin/bash
+
+script_path="src/plot.py"
+
+# Check if the Python script exists. Exit with an error if not found.
+if [[ ! -f "$script_path" ]]; then
+  echo "Error: Python script not found at '$script_path'." >&2  # Redirect error to stderr
+  exit 1  # Exit with a non-zero status to indicate an error
+fi
+
+python3 -u "$script_path" 2>&1  # Redirect stderr to stdout
+
+# Check the exit status of the Python script.
+exit_status=$?
+
+# Optionally, log or print the exit status.
+echo "Python script exited with status: $exit_status"
+
+exit "$exit_status"

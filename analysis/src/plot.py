@@ -2,9 +2,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Global Variables for file paths
-PARALLEL_CSV_PATH = "parallel/report/parallel_execution_report.csv"
-SEQUENTIAL_CSV_PATH = "sequential/report/sequential_execution_report.csv"
-GRAPH_PATH = "analysis/graphs"
+PARALLEL_CSV_PATH = "../parallel/report/parallel_execution_report.csv"
+SEQUENTIAL_CSV_PATH = "../sequential/report/sequential_execution_report.csv"
+GRAPH_PATH = "../analysis/graphs"
 
 
 def plot_execution_time(csv_path: str) -> None:
